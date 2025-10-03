@@ -55,13 +55,25 @@ async function main() {
   });
 
   // Create a default user
-  await prisma.user.upsert({
+  const user = await prisma.user.upsert({
     where: { email: "admin@example.com" },
     update: {},
     create: {
       name: "Admin User",
       email: "admin@example.com",
-      password: "password123", // ⚠️ For demo only. In production, hash passwords.
+      password: "password123", // ⚠️ Only for demo. Use hashing in real apps.
+    },
+  });
+
+  // Create a sample order
+  await prisma.order.create({
+    data: {
+      orderNumber: "ORD-1001",
+      userId: user.id,
+      brandId: essilor.id,
+      productId: essilor.products[0].id, // First product of Essilor
+      status: "PENDING",
+      notes: "Sample seeded order",
     },
   });
 
