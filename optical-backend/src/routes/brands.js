@@ -1,20 +1,26 @@
+// src/routes/orders.js
+
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prismaClient.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-// GET all brands (with products)
+// GET /api/orders
 router.get("/", async (req, res) => {
   try {
-    const brands = await prisma.brand.findMany({
-      include: { products: true },
-      orderBy: { name: "asc" },
+    const orders = await prisma.order.findMany({
+      include: {
+        product: true,
+        user: true,
+        brand: true,
+      },
     });
-    res.json(brands);
-  } catch (err) {
-    console.error("❌ Error fetching brands:", err);
-    res.status(500).json({ error: "Failed to fetch brands" });
+
+    // ✅ Always return something, even if empty
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error.message);
+    res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
