@@ -1,16 +1,17 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+// prisma/seed.js
+import prisma from "../src/prismaClient.js";
 
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Seed brands
+  // Create brands with products
   const essilor = await prisma.brand.upsert({
     where: { name: "Essilor" },
     update: {},
     create: {
       name: "Essilor",
       logoUrl: "/logo-light.svg",
+      active: true,
       products: {
         create: [
           {
@@ -38,6 +39,7 @@ async function main() {
     create: {
       name: "Hoya",
       logoUrl: "/logo-dark.svg",
+      active: true,
       products: {
         create: [
           {
@@ -52,15 +54,25 @@ async function main() {
     },
   });
 
-  console.log("✅ Seeding completed!");
+  // Create a default user
+  await prisma.user.upsert({
+    where: { email: "admin@example.com" },
+    update: {},
+    create: {
+      name: "Admin User",
+      email: "admin@example.com",
+      password: "password123", // ⚠️ For demo only. In production, hash passwords.
+    },
+  });
+
+  console.log("✅ Seeding complete!");
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error("❌ Seeding failed:", e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
